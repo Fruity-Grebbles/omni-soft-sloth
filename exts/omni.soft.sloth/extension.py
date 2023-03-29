@@ -50,7 +50,7 @@ class Extension(omni.ext.IExt):
         self.running = True
         self.should_continue = True
         while self.should_continue:
-            bytesAddressPair = UDPServerSocket.recvfrom(1024)
+            bytesAddressPair = self.udp_socket.recvfrom(1024)
 
             message = bytesAddressPair[0]
 
