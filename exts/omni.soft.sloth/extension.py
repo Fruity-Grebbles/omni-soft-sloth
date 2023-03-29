@@ -9,39 +9,39 @@ class Extension(omni.ext.IExt):
 
         self.running = False
         self.should_continue = False
-        self.tcp_socket = None
-        threading.Thread(target=self.tcpip).start()
+        self.udp_socket = None
+        threading.Thread(target=self.udp).start()
 
     def on_shutdown(self):
         self.should_continue = False
-        if self.tcp_socket:
+        if self.udp_socket:
             print("shutdown socket")
-            self.tcp_socket.shutdown(socket.SHUT_RDWR)
+            self.udp_socket.shutdown(socket.SHUT_RDWR)
             # wait for the thread to finish
             while self.running:
                 print("waiting for thread to finish")
                 time.sleep(0.1)
-            self.tcp_socket = None
+            self.udp_socket = None
 
-    def tcpip(self):
-        self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def udp(self):
+        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         max_attempts = 10
         for i in range(max_attempts):
             print("attempting to connect to server:", i)
             try:
-                self.tcp_socket.bind(("127.0.0.1", 40005)) 
+                self.udp_socket.bind(("127.0.0.1", 20001)) 
                 break
             except:
                 time.sleep(1)
             if i == max_attempts:
                 print("failed to connect to server")
-                self.tcp_socket = None
+                self.udp_socket = None
                 return
-        self.tcp_socket.listen(1)
+        self.udp_socket.listen(1)
 
         print("connecting...")
         try:
-            self.client_socket, self.ip_port = self.tcp_socket.accept()
+            self.client_socket, self.ip_port = self.udp_socket.accept()
         except Exception as e:
             print(e)
             return
@@ -50,12 +50,19 @@ class Extension(omni.ext.IExt):
         self.running = True
         self.should_continue = True
         while self.should_continue:
-            data = self.client_socket.recv(1024)
-            if not data:
-                break 
-            print(data)
+            bytesAddressPair = UDPServerSocket.recvfrom(1024)
+
+            message = bytesAddressPair[0]
+
+            address = bytesAddressPair[1]
+
+            clientMsg = "Message from Client:{}".format(message)
+            clientIP  = "Client IP Address:{}".format(address)
+            
+            print(clientMsg)
+            print(clientIP)
 
         print("client disconnected")
-        self.tcp_socket.close()
-        self.tcp_socket = None
+        self.udp_socket.close()
+        self.udp_socket = None
         self.running = False
