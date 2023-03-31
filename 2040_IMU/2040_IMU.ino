@@ -7,6 +7,7 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <WiFiUdp.h>
+#include <Arduino_LSM6DSOX.h>
 
 int status = WL_IDLE_STATUS;
 #include "arduino_secrets.h" 
@@ -19,7 +20,7 @@ int keyIndex = 0;            // your network key index number (needed only for W
 unsigned int localPort = 2390;      // local port to listen on
 
 char packetBuffer[256]; //buffer to hold incoming packet
-char  ReplyBuffer[] = "acknowledged";       // a string to send back
+char  ReplyBuffer[1024]; // buffer to hold out
 
 WiFiUDP Udp;
 
@@ -42,6 +43,12 @@ void setup() {
     Serial.println("Please upgrade the firmware");
   }
 
+  // Attempt to initialize IMU
+  if (!IMU.begin()) {
+    Serial.println("Failed to initialize IMU!");
+    while (1);
+  }
+
   // attempt to connect to WiFi network:
   while (status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
@@ -62,6 +69,10 @@ void setup() {
 
 void loop() {
 
+  // IMU data variables
+  float ax, ay, az;
+  float gx, gy, gz;
+
   // if there's data available, read a packet
   int packetSize = Udp.parsePacket();
   if (packetSize) {
@@ -80,6 +91,20 @@ void loop() {
     }
     Serial.println("Contents:");
     Serial.println(packetBuffer);
+
+    // Get the IMU data
+    if (IMU.accelerationAvailable()) {
+      IMU.readAcceleration(ax, ay, az);
+    }
+    if (IMU.gyroscopeAvailable()) {
+      IMU.readGyroscope(gx, gy, gz);
+    }
+
+    // Format the IMU data to send back to the PC
+    sprintf(ReplyBuffer, "ax: %f, ay: %f, az: %f, gx: %f, gy: %f, gz: %f", ax, ay, az, gx, gy, gz);
+    
+    // Print the IMU data to the serial monitor
+    Serial.println(ReplyBuffer);
 
     // send a reply, to the IP address and port that sent us the packet we received
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
