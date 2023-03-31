@@ -12,6 +12,7 @@ int status = WL_IDLE_STATUS;
 #include "arduino_secrets.h" 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
 char ssid[] = SECRET_SSID;        // your network SSID (name)
+char user[] = SECRET_USER;    // your network user name for WPA2 Enterprise
 char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key index number (needed only for WEP)
 
@@ -46,7 +47,7 @@ void setup() {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-    status = WiFi.begin(ssid, pass);
+    status = WiFi.beginEnterprise(ssid, user, pass);
 
     // wait 10 seconds for connection:
     delay(10000);
