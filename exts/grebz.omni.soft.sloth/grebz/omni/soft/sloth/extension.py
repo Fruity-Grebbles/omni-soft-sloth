@@ -10,7 +10,7 @@ class Extension(omni.ext.IExt):
         self.running = False
         self.should_continue = False
         self.udp_socket = None
-        threading.Thread(target=self.udp).start()
+        threading.Thread(target=self.udp, args=("128.235.165.151", 2390)).start()
 
     def on_shutdown(self):
         self.should_continue = False
@@ -18,10 +18,6 @@ class Extension(omni.ext.IExt):
             # shutdown the socket if it exists
             print("shutdown socket")
             self.udp_socket.shutdown(socket.SHUT_RDWR)
-            # wait for the thread to finish
-            while self.running:
-                print("waiting for thread to finish")
-                time.sleep(0.1)
             self.udp_socket = None
 
     def udp(self, ip : str, port: int, max_attempts: int = 10):
@@ -54,26 +50,17 @@ class Extension(omni.ext.IExt):
                 print("failed to connect to server")
                 self.udp_socket = None
                 return
-        # Listen for incoming datagrams
-        self.udp_socket.listen(1)
-
-        print("connecting...")
-
-        # Accept a connection
-        try:
-            self.client_socket, self.ip_port = self.udp_socket.accept()
-        # If we get an error, print it and close the socket
-        except Exception as e:
-            print(e)
-            return
-
-        # Print the client's IP address
-        print("client", self.ip_port, "connected")
+        
         
         self.running = True
         self.should_continue = True
 
         while self.should_continue:
+
+            # Send a message to the client as a byte array
+            message = b"Hello UDP Client"
+            self.udp_socket.sendto(message, ("10.203.195.238", port))
+
             bytesAddressPair = self.udp_socket.recvfrom(1024)
 
             message = bytesAddressPair[0]
