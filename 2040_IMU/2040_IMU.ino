@@ -38,19 +38,19 @@ void setup() {
 
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
-    try_serial_println("Communication with WiFi module failed!");
+    Serial.println("Communication with WiFi module failed!");
     // don't continue
     while (true);
   }
 
   String fv = WiFi.firmwareVersion();
   if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
-    try_serial_println("Please upgrade the firmware");
+    Serial.println("Please upgrade the firmware");
   }
 
   // Attempt to initialize IMU
   if (!IMU.begin()) {
-    try_serial_println("Failed to initialize IMU!");
+    Serial.println("Failed to initialize IMU!");
     while (1);
   }
 
@@ -58,17 +58,17 @@ void setup() {
   // attempt to connect to WiFi network:
   while (status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
-    try_serial_println(ssid);
+    Serial.println(ssid);
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
     status = WiFi.beginEnterprise(ssid, user, pass);
 
     // wait 10 seconds for connection:
     delay(10000);
   }
-  try_serial_println("Connected to WiFi");
+  Serial.println("Connected to WiFi");
   printWifiStatus();
 
-  try_serial_println("\nStarting connection to server...");
+  Serial.println("\nStarting connection to server...");
   // if you get a connection, report back via serial:
   Udp.begin(localPort);
 }
@@ -83,20 +83,20 @@ void loop() {
   int packetSize = Udp.parsePacket();
   if (packetSize) {
     Serial.print("Received packet of size ");
-    try_serial_println(packetSize);
+    Serial.println(packetSize);
     Serial.print("From ");
     IPAddress remoteIp = Udp.remoteIP();
     Serial.print(remoteIp);
     Serial.print(", port ");
-    try_serial_println(Udp.remotePort());
+    Serial.println(Udp.remotePort());
 
     // read the packet into packetBufffer
     int len = Udp.read(packetBuffer, 255);
     if (len > 0) {
       packetBuffer[len] = 0;
     }
-    try_serial_println("Contents:");
-    try_serial_println(packetBuffer);
+    Serial.println("Contents:");
+    Serial.println(packetBuffer);
 
     // Get the IMU data
     if (IMU.accelerationAvailable()) {
@@ -107,10 +107,10 @@ void loop() {
     }
 
     // Format the IMU data to send back to the PC
-    sprintf(ReplyBuffer, "ax: %f, ay: %f, az: %f, gx: %f, gy: %f, gz: %f", ax, ay, az, gx, gy, gz);
+    sprintf(ReplyBuffer, "%f,%f,%f", gx, gy, gz);
     
     // Print the IMU data to the serial monitor
-    try_serial_println(ReplyBuffer);
+    Serial.println(ReplyBuffer);
 
     // send a reply, to the IP address and port that sent us the packet we received
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
@@ -123,23 +123,16 @@ void loop() {
 void printWifiStatus() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
-  try_serial_println(WiFi.SSID());
+  Serial.println(WiFi.SSID());
 
   // print your board's IP address:
   IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
-  try_serial_println(ip);
+  Serial.println(ip);
 
   // print the received signal strength:
   long rssi = WiFi.RSSI();
   Serial.print("signal strength (RSSI):");
   Serial.print(rssi);
-  try_serial_println(" dBm");
-}
-
-void try_serial_println(const char *s) {
-  // Try to print to serial monitor, but don't crash if it's not available.
-  if (Serial) {
-    Serial.println(s);
-  }
+  Serial.println(" dBm");
 }
