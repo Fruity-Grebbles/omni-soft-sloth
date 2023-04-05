@@ -6,7 +6,7 @@ import time
 import socket
 import threading
 
-ADDRESS = "10.203.198.100"
+ADDRESS = "10.202.6.177"
 PORT = 2390
 
 class Controller(BehaviorScript):
@@ -14,6 +14,7 @@ class Controller(BehaviorScript):
         self.running = False
         self.should_continue = False
         self.udp_socket = None
+        self.message = ""
         threading.Thread(target=self.udp, args=(ADDRESS, PORT)).start()
         print(f"{__class__.__name__}.on_init()->{self.prim_path}")
 
@@ -27,15 +28,31 @@ class Controller(BehaviorScript):
         print(f"{__class__.__name__}.on_destroy()->{self.prim_path}")
 
     def on_play(self):
+        self._playing = True
         print(f"{__class__.__name__}.on_play()->{self.prim_path}")
 
     def on_pause(self):
+        self._playing = False
         print(f"{__class__.__name__}.on_pause()->{self.prim_path}")
 
     def on_stop(self):
+        self._playing = False
         print(f"{__class__.__name__}.on_stop()->{self.prim_path}")
 
     def on_update(self, current_time: float, delta_time: float):
+
+        if self._playing:
+
+            # set the prim xform rotation to the values from the udp socket
+            if self.udp_socket:
+                gx, gy, gz = self.message.split(b',')
+                gx = float(gx)
+                gy = float(gy)
+                gz = float(gz)
+                # print a message to the console
+                print(f"received message: {gx}, {gy}, {gz}")
+                self.prim.GetAttribute("xformOp:rotateXYZ").Set(Gf.Vec3f(gx, gy, gz))
+
         print(f"{__class__.__name__}.on_update(current_time={current_time}, delta_time={delta_time})->{self.prim_path}")
 
     def udp(self, ip : str, port: int, max_attempts: int = 10):
@@ -83,17 +100,14 @@ class Controller(BehaviorScript):
 
             bytesAddressPair = self.udp_socket.recvfrom(1024)
 
-            message = bytesAddressPair[0]
+            self.message = bytesAddressPair[0]
 
             address = bytesAddressPair[1]
 
-            clientMsg = "Message from Client:{}".format(message)
+            clientMsg = "Message from Client:{}".format(self.message)
             clientIP  = "Client IP Address:{}".format(address)
-            
-            print(clientMsg)
-            print(clientIP)
 
         print("client disconnected")
-        self.udp_socket.close()
+        # self.udp_socket.close()
         self.udp_socket = None
         self.running = False
