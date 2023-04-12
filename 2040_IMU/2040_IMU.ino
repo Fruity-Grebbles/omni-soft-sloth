@@ -107,7 +107,7 @@ void loop() {
     }
 
     // Format the IMU data to send back to the PC
-    sprintf(ReplyBuffer, "%f,%f,%f", gx, gy, gz);
+    sprintf(ReplyBuffer, "%f,%f,%f,%f,%f,%f", ax,ay,az, gx, gy, gz);
     
     // Print the IMU data to the serial monitor
     Serial.println(ReplyBuffer);
