@@ -6,8 +6,9 @@ import time
 import socket
 import threading
 
-ADDRESS = "10.202.6.177"
+ADDRESS = "192.168.1.194"
 PORT = 2390
+SCALEFACTOR = 100000
 
 class Controller(BehaviorScript):
     def on_init(self):
@@ -43,15 +44,21 @@ class Controller(BehaviorScript):
 
         if self._playing:
 
-            # set the prim xform rotation to the values from the udp socket
+            # if the udp socket exists, we will parse the message and set the prim forces
             if self.udp_socket:
-                gx, gy, gz = self.message.split(b',')
+                ax, ay, az, gx, gy, gz = self.message.split(b',')
+                ax = float(ax) * SCALEFACTOR
+                ay = float(ay) * SCALEFACTOR
+                az = float(az) * SCALEFACTOR
                 gx = float(gx)
                 gy = float(gy)
                 gz = float(gz)
                 # print a message to the console
-                print(f"received message: {gx}, {gy}, {gz}")
-                self.prim.GetAttribute("xformOp:rotateXYZ").Set(Gf.Vec3f(gx, gy, gz))
+                print(f"received message: {ax}, {ay}, {az}, {gx}, {gy}, {gz}")
+                # set the prim force and torque to the values from the udp socket
+                self.prim.GetAttribute("physxForce:force").Set(Gf.Vec3f(ax, ay, az))
+                self.prim.GetAttribute("physxForce:torque").Set(Gf.Vec3f(gx, gy, gz))
+
 
         print(f"{__class__.__name__}.on_update(current_time={current_time}, delta_time={delta_time})->{self.prim_path}")
 
