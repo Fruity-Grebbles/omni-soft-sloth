@@ -21,7 +21,7 @@
             string boundCamera = "/OmniverseKit_Persp"
         }
         dictionary omni_layer = {
-            string authoring_layer = "./Origami_Sloth.usd"
+            string authoring_layer = "./Origami_Sloth.usda"
             dictionary muteness = {
             }
         }
@@ -595,8 +595,9 @@ def Xform "RootNode" (
         {
             float3 xformOp:rotateXYZ = (-71.20296, -10.789394, -7.4602256)
             float3 xformOp:scale = (2.598099, 2.5980988, 2.5980985)
-            double3 xformOp:translate = (181.27308349609376, 201.20570068359376, -25.815142822265614)
-            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+            double3 xformOp:translate = (-55.79368084747023, 232.1637236510878, -10.47475070220943)
+            double3 xformOp:translate:pivot = (-141.27135467529297, -34.07980632781982, -9.631118774414062)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:translate:pivot", "xformOp:rotateXYZ", "xformOp:scale", "!invert!xformOp:translate:pivot"]
 
             def Mesh "Object044" (
                 prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysxRigidBodyAPI", "PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
@@ -619,6 +620,11 @@ def Xform "RootNode" (
                 )
                 int[] primvars:st:indices = [1, 3, 0, 0, 2, 1, 7, 4, 6, 6, 5, 7, 8, 11, 9, 9, 10, 8, 15, 16, 12, 12, 13, 15, 13, 12, 14, 14, 17, 13, 19, 21, 18, 18, 22, 19, 22, 18, 20, 20, 23, 22, 26, 27, 25, 25, 24, 26, 30, 31, 29, 29, 28, 30, 32, 34, 35, 35, 33, 32, 39, 36, 38, 38, 37, 39, 42, 41, 43, 43, 40, 42, 44, 45, 47, 47, 49, 44, 49, 47, 48, 48, 46, 49, 55, 51, 54, 54, 52, 55, 52, 54, 50, 50, 53, 52, 57, 58, 56, 56, 59, 57, 61, 62, 60, 60, 63, 61, 67, 65, 66, 66, 64, 67, 69, 70, 68, 68, 71, 69, 74, 73, 75, 75, 72, 74, 81, 76, 78, 78, 80, 81, 80, 78, 79, 79, 77, 80, 85, 87, 84, 84, 82, 85, 82, 84, 86, 86, 83, 82, 88, 89, 91, 91, 90, 88, 120, 135, 192, 192, 173, 120]
                 uniform token subdivisionScheme = "none"
+                double3 xformOp:rotateXYZ = (0, 0, 0)
+                double3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                double3 xformOp:translate:pivot = (-141.27135467529297, -34.07980632781982, -9.631118774414062)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:translate:pivot", "xformOp:rotateXYZ", "xformOp:scale", "!invert!xformOp:translate:pivot"]
             }
         }
 
