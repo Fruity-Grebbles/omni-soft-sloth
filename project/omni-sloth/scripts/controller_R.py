@@ -7,7 +7,7 @@ import socket
 import threading
 
 ADDRESS = "192.168.1.187"
-PORT = 2390
+PORT = 2380
 SCALEFACTOR = 300000
 
 class Controller(BehaviorScript):
