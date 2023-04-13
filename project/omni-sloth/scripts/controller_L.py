@@ -8,7 +8,7 @@ import threading
 
 ADDRESS = "192.168.1.194"
 PORT = 2390
-SCALEFACTOR = 100000
+SCALEFACTOR = 300000
 
 class Controller(BehaviorScript):
     def on_init(self):
@@ -57,7 +57,7 @@ class Controller(BehaviorScript):
                 print(f"received message: {ax}, {ay}, {az}, {gx}, {gy}, {gz}")
                 # set the prim force and torque to the values from the udp socket
                 self.prim.GetAttribute("physxForce:force").Set(Gf.Vec3f(ax, ay, az))
-                self.prim.GetAttribute("physxForce:torque").Set(Gf.Vec3f(gx, gy, gz))
+                # self.prim.GetAttribute("physxForce:torque").Set(Gf.Vec3f(gx, gy, gz))
 
 
         print(f"{__class__.__name__}.on_update(current_time={current_time}, delta_time={delta_time})->{self.prim_path}")

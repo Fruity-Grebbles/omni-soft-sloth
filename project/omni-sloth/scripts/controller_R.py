@@ -6,14 +6,16 @@ import time
 import socket
 import threading
 
-ADDRESS = "10.202.6.177"
+ADDRESS = "192.168.1.187"
 PORT = 2390
+SCALEFACTOR = 300000
 
 class Controller(BehaviorScript):
     def on_init(self):
         self.running = False
         self.should_continue = False
         self.udp_socket = None
+        self.message = ""
         threading.Thread(target=self.udp, args=(ADDRESS, PORT)).start()
         print(f"{__class__.__name__}.on_init()->{self.prim_path}")
 
@@ -42,9 +44,21 @@ class Controller(BehaviorScript):
 
         if self._playing:
 
-            # set the prim xform rotation to the values from the udp socket
+            # if the udp socket exists, we will parse the message and set the prim forces
             if self.udp_socket:
-                self.prim.GetAttribute("xformOp:rotateXYZ").Set(Gf.Vec3f(0, 0, 0))
+                ax, ay, az, gx, gy, gz = self.message.split(b',')
+                ax = float(ax) * SCALEFACTOR
+                ay = float(ay) * SCALEFACTOR
+                az = float(az) * SCALEFACTOR
+                gx = float(gx)
+                gy = float(gy)
+                gz = float(gz)
+                # print a message to the console
+                print(f"received message: {ax}, {ay}, {az}, {gx}, {gy}, {gz}")
+                # set the prim force and torque to the values from the udp socket
+                self.prim.GetAttribute("physxForce:force").Set(Gf.Vec3f(ax, ay, az))
+                # self.prim.GetAttribute("physxForce:torque").Set(Gf.Vec3f(gx, gy, gz))
+
 
         print(f"{__class__.__name__}.on_update(current_time={current_time}, delta_time={delta_time})->{self.prim_path}")
 
@@ -99,11 +113,8 @@ class Controller(BehaviorScript):
 
             clientMsg = "Message from Client:{}".format(self.message)
             clientIP  = "Client IP Address:{}".format(address)
-            
-            print(clientMsg)
-            print(clientIP)
 
         print("client disconnected")
-        self.udp_socket.close()
+        # self.udp_socket.close()
         self.udp_socket = None
         self.running = False
